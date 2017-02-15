@@ -10,12 +10,12 @@
     <script src="./scripts/synth.js" charset="utf-8"></script>
   </head>
   <body>
-    <a-scene>
+    <a-scene fog="density: 0.03; type: exponential">
       <a-sky id="the-cold-and-ruthless-universe" color="#000000"></a-sky>
-      <a-entity id="your-face" camera="userHeight: 1.6" look-controls>
+      <a-entity id="your-face" camera="userHeight: 1.6" look-controls wasd-controls="acceleration: 10">
+        <a-plane id="placement-mat" class="clickable" placement-mat color="#CCC" position="0 0 -1" height="5" width="5" visible="true"></a-plane>
         <a-entity id="cursor" cursor raycaster="objects: .clickable"></a-entity>
       </a-entity>
-      <a-plane id="placement-mat" class="clickable" placement-mat color="#CCC" position="0 0 -20" height="20" width="20" visible="true"></a-plane>
     </a-scene>
   </body>
 </html>
