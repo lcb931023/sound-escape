@@ -79,6 +79,7 @@
 	    this.__active = false;
 	    this.__isDown = false;
 	    this.__intersectedEl = null;
+      this.__intersection = null;
 	    this.__attachEventListeners();
 	  },
 
@@ -246,7 +247,9 @@
 	    }
 
 	    if (this.__isDown && this.__intersectedEl) {
-	      this.__emit('click');
+        this.__emit('click', {
+          intersection: this.__intersection
+        });
 	    }
 	    this.__isDown = false;
 	    this.__resetMousePosition();
@@ -441,30 +444,35 @@
 	    if (intersects.length > 0) {
 	      /* get the closest three obj */
 	      var obj = void 0;
+        var intersection = void 0;
 	      intersects.every(function (item) {
 	        if (item.object.parent.visible === true) {
 	          obj = item.object;
+            intersection = item;
 	          return false;
 	        } else {
 	          return true;
 	        }
 	      });
 	      if (!obj) {
-	        this.__clearIntersectObject();
+	        this.__clearIntersectEl();
+          this.__clearIntersectDetail();
 	        return;
 	      }
-	      /* get the entity */
-	      var _el = obj.parent.el;
-	      /* only updates if the object is not the activated object */
 
+        /* always update the intersection data */
+        this.__setIntersectDetail(intersection);
+        /* get the entity */
+        var _el = obj.parent.el;
+        /* only updates if the object is not the activated object */
 	      if (this.__intersectedEl === _el) {
 	        return;
 	      }
-	      this.__clearIntersectObject();
+	      this.__clearIntersectEl();
 	      /* apply new object as intersected */
-	      this.__setIntersectObject(_el);
+	      this.__setIntersectEl(_el);
 	    } else {
-	      this.__clearIntersectObject();
+	      this.__clearIntersectEl();
 	    }
 	  },
 
@@ -472,9 +480,9 @@
 	  /**
 	   * Set intersect element
 	   * @private
-	   * @param {AEntity} el `a-entity` element
+     * @param {AEntity} el `a-entity` element
 	   */
-	  __setIntersectObject: function __setIntersectObject(el) {
+	  __setIntersectEl: function __setIntersectEl(el) {
 
 	    this.__intersectedEl = el;
 	    if (this.__isMobile) {
@@ -484,13 +492,27 @@
 	    el.emit('mouseenter');
 	    this.el.addState('hovering');
 	  },
+    
+    
+	  /**
+	   * Set intersect detail
+	   * @private
+     * @param {Object} intersection returned from THREE.Raycaster.intersectObjects
+	   */
+	  __setIntersectDetail: function __setIntersectDetail(intersection) {
+      this.__intersection = intersection;
+	  },
+	  __clearIntersectDetail: function __clearIntersectDetail() {
+      this.__intersection = null;
+	  },
+    
 
 
 	  /**
 	   * Clear intersect element
 	   * @private
 	   */
-	  __clearIntersectObject: function __clearIntersectObject() {
+	  __clearIntersectEl: function __clearIntersectEl() {
 	    var el = this.__intersectedEl;
 
 	    if (el && !this.__isMobile) {
@@ -510,12 +532,12 @@
 	  /**
 	   * @private
 	   */
-	  __emit: function __emit(evt) {
+	  __emit: function __emit(evt, detail) {
 	    var __intersectedEl = this.__intersectedEl;
-
-	    this.el.emit(evt, { target: __intersectedEl });
+      detail = detail || {};
+	    this.el.emit(evt, Object.assign({ target: __intersectedEl }, detail));
 	    if (__intersectedEl) {
-	      __intersectedEl.emit(evt);
+	      __intersectedEl.emit(evt, detail);
 	    }
 	  }
 	});
